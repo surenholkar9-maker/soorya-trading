@@ -3,380 +3,241 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Soorya Trading - Professional Market Analysis</title>
+    <title>Soorya Trading - Professional Market Analysis with Upstox</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-            background: linear-gradient(to bottom, #0f172a, #1e293b);
-            color: #333;
+            background: linear-gradient(135deg, #0a0e27, #16213e);
+            color: #fff;
             min-height: 100vh;
         }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            color: white;
+        .navbar {
+            background: rgba(20, 33, 61, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
-
-        .header h1 {
-            font-size: 36px;
-            font-weight: bold;
-            margin-bottom: 5px;
+        .logo { font-size: 24px; font-weight: bold; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .nav-items { display: flex; gap: 2rem; align-items: center; }
+        .nav-btn { background: rgba(102, 126, 234, 0.2); border: 1px solid #667eea; color: #667eea; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; transition: all 0.3s; }
+        .nav-btn:hover { background: #667eea; color: white; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .card {
+            background: rgba(20, 33, 61, 0.6);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
         }
-
-        .header p {
-            opacity: 0.9;
-            font-size: 16px;
+        .card:hover { border-color: #667eea; transform: translateY(-5px); box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2); }
+        .card-title { font-size: 18px; font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .card-value { font-size: 32px; font-weight: bold; margin: 1rem 0; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .card-subtitle { font-size: 14px; color: #999; }
+        .portfolio-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(20, 33, 61, 0.6);
+            border-radius: 12px;
+            overflow: hidden;
         }
-
-        .btn-logout {
-            background: rgba(255,255,255,0.2);
-            border: none;
+        .portfolio-table th, .portfolio-table td { padding: 1rem; text-align: left; border-bottom: 1px solid rgba(102, 126, 234, 0.1); }
+        .portfolio-table th { background: rgba(102, 126, 234, 0.1); font-weight: 600; }
+        .portfolio-table tr:hover { background: rgba(102, 126, 234, 0.05); }
+        .upstox-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
+            border: none;
             padding: 12px 24px;
-            border-radius: 10px;
+            border-radius: 8px;
+            font-size: 16px;
             cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
+            transition: all 0.3s;
         }
-
-        .btn-logout:hover {
-            background: rgba(255,255,255,0.3);
-        }
-
-        .search-section {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        }
-
-        .search-section h2 {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .search-controls {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .search-controls select,
-        .search-controls input {
-            padding: 12px;
-            border: 2px solid #e5e7eb;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 500;
-        }
-
-        .search-input {
-            width: 100% !important;
-            padding: 16px 20px !important;
-            border: 2px solid #e5e7eb !important;
-            border-radius: 12px !important;
-            font-size: 18px !important;
-            font-weight: 500 !important;
-            margin-bottom: 20px !important;
-        }
-
-        .placeholder-box {
-            background: white;
-            border-radius: 20px;
-            padding: 60px;
-            text-align: center;
-        }
-
-        .placeholder-box .emoji {
-            font-size: 80px;
-            margin-bottom: 20px;
-        }
-
-        .placeholder-box h2 {
-            font-size: 28px;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-
-        .placeholder-box p {
-            font-size: 16px;
-            color: #6b7280;
-        }
-
-        .login-screen {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .login-box {
-            background: white;
-            border-radius: 20px;
-            padding: 50px;
-            max-width: 450px;
-            width: 100%;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
-        }
-
-        .login-header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .login-header .emoji {
-            font-size: 70px;
-            margin-bottom: 20px;
-        }
-
-        .login-header h1 {
-            font-size: 36px;
-            font-weight: bold;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 10px;
-        }
-
-        .login-header p {
-            color: #666;
-            font-size: 16px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .form-group > div {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 14px;
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 8px;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 14px;
-            border: 2px solid #e5e7eb;
-            border-radius: 10px;
-            font-size: 16px;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        .btn-login {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
-        .btn-login:hover {
-            opacity: 0.9;
-        }
-
-        .demo-credentials {
-            margin-top: 30px;
-            padding: 20px;
-            background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
-            border-radius: 10px;
-        }
-
-        .demo-credentials p {
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 10px;
-            text-align: center;
-            font-size: 14px;
-        }
-
-        .demo-credentials p:first-child {
-            margin-bottom: 15px;
-        }
-
-        .demo-credentials small {
-            color: #6b7280;
-            text-align: center;
-            font-size: 14px;
-            display: block;
-        }
+        .upstox-btn:hover { transform: scale(1.05); box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4); }
+        .chart-container { position: relative; height: 300px; margin-top: 2rem; }
+        .status { padding: 0.5rem 1rem; border-radius: 6px; font-size: 12px; font-weight: 600; display: inline-block; }
+        .status.connected { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        .status.disconnected { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        .input-group { margin-bottom: 1rem; }
+        .input-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+        .input-group input, .input-group select { width: 100%; padding: 0.75rem; background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.2); border-radius: 6px; color: white; }
     </style>
 </head>
 <body>
-    <div id="root"></div>
+    <div class="navbar">
+        <div class="logo">☀️ Soorya Trading</div>
+        <div class="nav-items">
+            <div id="upstoxStatus" class="status disconnected">Disconnected</div>
+            <button class="nav-btn" id="connectBtn">Connect Upstox</button>
+            <button class="nav-btn" id="logoutBtn">Logout</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="grid" id="statsGrid">
+            <div class="card">
+                <div class="card-title">💼 Portfolio Value</div>
+                <div class="card-value" id="portfolioValue">₹0</div>
+                <div class="card-subtitle">Total Holdings</div>
+            </div>
+            <div class="card">
+                <div class="card-title">📈 Day Change</div>
+                <div class="card-value" id="dayChange" style="color: #10b981;">+0.00%</div>
+                <div class="card-subtitle">Today's Performance</div>
+            </div>
+            <div class="card">
+                <div class="card-title">🎯 Open Orders</div>
+                <div class="card-value" id="openOrders">0</div>
+                <div class="card-subtitle">Active Trades</div>
+            </div>
+            <div class="card">
+                <div class="card-title">🔒 Margin Available</div>
+                <div class="card-value" id="marginAvailable">₹0</div>
+                <div class="card-subtitle">Buying Power</div>
+            </div>
+        </div>
+
+        <div class="card" style="margin-bottom: 2rem;">
+            <h2 style="margin-bottom: 1.5rem;">📊 Your Holdings</h2>
+            <table class="portfolio-table">
+                <thead>
+                    <tr>
+                        <th>Symbol</th>
+                        <th>Quantity</th>
+                        <th>Buy Price</th>
+                        <th>Current Price</th>
+                        <th>P&L</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="holdingsBody">
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 2rem;">Loading holdings from Upstox...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2 style="margin-bottom: 1.5rem;">💹 Quick Trade</h2>
+            <div class="input-group">
+                <label>Symbol</label>
+                <input type="text" id="tradeSymbol" placeholder="e.g., RELIANCE">
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div class="input-group">
+                    <label>Quantity</label>
+                    <input type="number" id="tradeQty" value="1" min="1">
+                </div>
+                <div class="input-group">
+                    <label>Price</label>
+                    <input type="number" id="tradePrice" value="0" step="0.01">
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <button class="upstox-btn" style="background: linear-gradient(135deg, #10b981, #059669);">🟢 BUY</button>
+                <button class="upstox-btn" style="background: linear-gradient(135deg, #ef4444, #dc2626);">🔴 SELL</button>
+            </div>
+        </div>
+    </div>
 
     <script>
-        class SooryaTrading {
+        // Upstox Integration
+        class UpstoxTrader {
             constructor() {
-                this.authenticated = false;
-                this.username = '';
-                this.password = '';
-                this.render();
-                this.attachEventListeners();
+                this.isConnected = false;
+                this.userData = null;
+                this.apiEndpoint = 'https://soorya-trading-backend.vercel.app/api';
+                this.initializeApp();
             }
 
-            attachEventListeners() {
-                const loginBtn = document.getElementById('login-btn');
-                const logoutBtn = document.getElementById('logout-btn');
-                if (loginBtn) {
-                    loginBtn.addEventListener('click', () => this.login());
-                }
-                if (logoutBtn) {
-                    logoutBtn.addEventListener('click', () => this.logout());
+            initializeApp() {
+                document.getElementById('connectBtn').addEventListener('click', () => this.connectUpstox());
+                document.getElementById('logoutBtn').addEventListener('click', () => this.logout());
+                this.loadDemoData();
+            }
+
+            async connectUpstox() {
+                try {
+                    // Redirect to Upstox OAuth
+                    const authUrl = `${this.apiEndpoint}/upstox/auth-url`;
+                    window.location.href = authUrl;
+                } catch (error) {
+                    console.error('Connection failed:', error);
+                    alert('Failed to connect to Upstox');
                 }
             }
 
-            login() {
-                const usernameInput = document.getElementById('username');
-                const passwordInput = document.getElementById('password');
-                
-                if (usernameInput && passwordInput) {
-                    this.username = usernameInput.value;
-                    this.password = passwordInput.value;
+            async fetchPortfolio() {
+                try {
+                    const token = localStorage.getItem('upstox_token');
+                    if (!token) return;
                     
-                    if (this.username && this.password) {
-                        this.authenticated = true;
-                        this.render();
-                        this.attachEventListeners();
-                    } else {
-                        alert('Please enter both username and password');
-                    }
+                    const response = await fetch(`${this.apiEndpoint}/upstox/portfolio`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const data = await response.json();
+                    this.updatePortfolioUI(data);
+                } catch (error) {
+                    console.error('Fetch failed:', error);
                 }
+            }
+
+            updatePortfolioUI(data) {
+                document.getElementById('portfolioValue').textContent = `₹${(data.total_value || 0).toFixed(2)}`;
+                document.getElementById('dayChange').textContent = `${(data.day_change || 0).toFixed(2)}%`;
+                document.getElementById('marginAvailable').textContent = `₹${(data.margin || 0).toFixed(2)}`;
+                
+                const tbody = document.getElementById('holdingsBody');
+                tbody.innerHTML = data.holdings?.map(h => `
+                    <tr>
+                        <td><strong>${h.symbol}</strong></td>
+                        <td>${h.quantity}</td>
+                        <td>₹${h.buy_price.toFixed(2)}</td>
+                        <td>₹${h.current_price.toFixed(2)}</td>
+                        <td style="color: ${h.pnl >= 0 ? '#10b981' : '#ef4444'};">${h.pnl >= 0 ? '+' : ''}${h.pnl.toFixed(2)}%</td>
+                        <td><button class="nav-btn" style="padding: 0.3rem 0.8rem; font-size: 12px;">Sell</button></td>
+                    </tr>
+                `).join('') || '<tr><td colspan="6" style="text-align: center;">No holdings</td></tr>';
+            }
+
+            loadDemoData() {
+                const demoData = {
+                    total_value: 500000,
+                    day_change: 2.35,
+                    margin: 150000,
+                    holdings: [
+                        { symbol: 'RELIANCE', quantity: 10, buy_price: 2500, current_price: 2850, pnl: 14 },
+                        { symbol: 'TCS', quantity: 5, buy_price: 3500, current_price: 3680, pnl: 5.14 },
+                        { symbol: 'INFY', quantity: 15, buy_price: 1400, current_price: 1420, pnl: 1.43 }
+                    ]
+                };
+                this.updatePortfolioUI(demoData);
+                document.getElementById('openOrders').textContent = '2';
             }
 
             logout() {
-                this.authenticated = false;
-                this.username = '';
-                this.password = '';
-                this.render();
-                this.attachEventListeners();
-            }
-
-            renderLoginScreen() {
-                return `
-                    <div class="login-screen">
-                        <div class="login-box">
-                            <div class="login-header">
-                                <div class="emoji">☀️</div>
-                                <h1>Soorya Trading</h1>
-                                <p>Professional Market Analysis</p>
-                            </div>
-                            <div class="form-group">
-                                <div>
-                                    <label>Username</label>
-                                    <input type="text" id="username" placeholder="soorya" />
-                                </div>
-                                <div>
-                                    <label>Password</label>
-                                    <input type="password" id="password" placeholder="Trading@2024" />
-                                </div>
-                            </div>
-                            <button class="btn-login" id="login-btn">Access Platform</button>
-                            <div class="demo-credentials">
-                                <p>Demo Credentials</p>
-                                <small>Username: <b>soorya</b></small>
-                                <small>Password: <b>Trading@2024</b></small>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            renderMainApp() {
-                return `
-                    <div class="container">
-                        <div class="header">
-                            <div>
-                                <h1>Soorya Trading</h1>
-                                <p>Search Analyze Trade with AI</p>
-                            </div>
-                            <button class="btn-logout" id="logout-btn">Logout</button>
-                        </div>
-                        <div class="search-section">
-                            <h2>🔍 Search Instruments</h2>
-                            <div class="search-controls">
-                                <select>
-                                    <option value="NSE">NSE</option>
-                                    <option value="BSE">BSE</option>
-                                </select>
-                                <select>
-                                    <option value="EQUITY">Equity</option>
-                                    <option value="FUTURES">Futures</option>
-                                    <option value="OPTIONS">Options</option>
-                                </select>
-                            </div>
-                            <input type="text" class="search-input" placeholder="Search instruments..." />
-                            <div class="placeholder-box">
-                                <div class="emoji">🔍</div>
-                                <h2>Search Any Instrument</h2>
-                                <p>Get instant AI-powered analysis</p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            render() {
-                const root = document.getElementById('root');
-                if (this.authenticated) {
-                    root.innerHTML = this.renderMainApp();
-                } else {
-                    root.innerHTML = this.renderLoginScreen();
-                }
+                localStorage.removeItem('upstox_token');
+                this.isConnected = false;
+                document.getElementById('upstoxStatus').textContent = 'Disconnected';
+                document.getElementById('upstoxStatus').className = 'status disconnected';
+                location.reload();
             }
         }
 
-        // Initialize the app
+        // Initialize app
         window.addEventListener('DOMContentLoaded', () => {
-            new SooryaTrading();
+            new UpstoxTrader();
         });
     </script>
 </body>
