@@ -57,6 +57,9 @@
           const [market, setMarket] = useState('NSE');
           const [analysisData, setAnalysisData] = useState(null);
           const [aiInsight, setAiInsight] = useState('');
+                const [portfolio, setPortfolio] = useState(null);
+    const [marketData, setMarketData] = useState({});
+    const [tradeForm, setTradeForm] = useState({ symbol: '', quantity: 1, price: 0, type: 'BUY' });
 
           const instruments = {
             EQUITY: [
@@ -86,6 +89,68 @@
               { symbol: 'BANKNIFTY 45500 PE', type: 'PUT', strike: 45500, price: 280, change: -1.2, oi: 32000, iv: 21.2, expiry: '2024-01-25' }
             ]
           };
+
+
+                // Fetch portfolio holdings
+    const fetchPortfolio = async () => {
+      const token = localStorage.getItem('accessToken');
+      if (!token) return;
+      try {
+        const response = await fetch(
+          `https://soorya-trading-backend.vercel.app/api/portfolio?token=${token}`
+        );
+        const data = await response.json();
+        setPortfolio(data);
+      } catch (error) {
+        console.error('Portfolio fetch failed:', error);
+      }
+    };
+
+    // Fetch market data
+    const fetchMarketData = async (instrumentKeys) => {
+      const token = localStorage.getItem('accessToken');
+      if (!token) return;
+      try {
+        const response = await fetch(
+          `https://soorya-trading-backend.vercel.app/api/market-data?token=${token}&instrumentKeys=${instrumentKeys}`
+        );
+        const data = await response.json();
+        setMarketData(data);
+      } catch (error) {
+        console.error('Market data fetch failed:', error);
+      }
+    };
+
+    // Execute trade
+    const executeTrade = async () => {
+      const token = localStorage.getItem('accessToken');
+      if (!token) return alert('Not authenticated');
+      const orderData = {
+        quantity: parseInt(tradeForm.quantity),
+        price: parseFloat(tradeForm.price),
+        product: 'MIS',
+        order_type: 'REGULAR',
+        validity: 'DAY',
+        variety: 'REGULAR',
+        tag: 'Soorya Trading',
+        instrument_token: tradeForm.symbol
+      };
+      try {
+        const response = await fetch(
+          'https://soorya-trading-backend.vercel.app/api/place-order',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token, orderData })
+          }
+        );
+        const result = await response.json();
+        alert(`Order ${tradeForm.type} successful!`);
+        setTradeForm({ symbol: '', quantity: 1, price: 0, type: 'BUY' });
+      } catch (error) {
+        alert(`Order failed: ${error.message}`);
+      }
+    };
 
           const login = async () => {
     try {
