@@ -394,6 +394,52 @@
 
               </div>
             </div>
+
+                  {authenticated && portfolio === null && (
+      <div style={{ marginTop: '30px' }}>
+        <button onClick={fetchPortfolio} style={{ padding: '12px 24px', background: '#667eea', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '16px' }}>📊 Load My Portfolio</button>
+      </div>
+    )}
+
+    {authenticated && portfolio && (
+      <div style={{ background: 'white', borderRadius: '15px', padding: '20px', marginTop: '30px', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }}>
+        <h3 style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '15px', color: '#1f2937' }}>📊 Your Holdings</h3>
+        <div style={{ maxHeight: '300px', overflowY: 'auto', background: '#f9f9f9', padding: '15px', borderRadius: '8px', fontSize: '13px', fontFamily: 'monospace' }}>
+          <pre>{JSON.stringify(portfolio.data || portfolio, null, 2)}</pre>
+        </div>
+      </div>
+    )}
+
+    {authenticated && (
+      <div style={{ background: 'linear-gradient(135deg, #667eea, #764ba2)', borderRadius: '15px', padding: '25px', marginTop: '30px', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }}>
+        <h3 style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '20px', color: 'white', display: 'flex', alignItems: 'center', gap: '10px' }}>💹 Execute Trade Order</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: 'rgba(255,255,255,0.8)', marginBottom: '8px' }}>Symbol/Instrument Key</label>
+            <input type="text" placeholder="NSE_EQ|INE002A01018" value={tradeForm.symbol} onChange={(e) => setTradeForm({...tradeForm, symbol: e.target.value})} style={{ width: '100%', padding: '12px', border: 'none', borderRadius: '6px', fontSize: '14px', fontFamily: 'monospace' }} />
+          </div>
+          <div>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: 'rgba(255,255,255,0.8)', marginBottom: '8px' }}>Quantity</label>
+            <input type="number" placeholder="1" value={tradeForm.quantity} onChange={(e) => setTradeForm({...tradeForm, quantity: e.target.value})} style={{ width: '100%', padding: '12px', border: 'none', borderRadius: '6px', fontSize: '14px' }} />
+          </div>
+          <div>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: 'rgba(255,255,255,0.8)', marginBottom: '8px' }}>Price</label>
+            <input type="number" placeholder="0.00" value={tradeForm.price} onChange={(e) => setTradeForm({...tradeForm, price: e.target.value})} style={{ width: '100%', padding: '12px', border: 'none', borderRadius: '6px', fontSize: '14px' }} />
+          </div>
+          <div>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: 'rgba(255,255,255,0.8)', marginBottom: '8px' }}>Order Type</label>
+            <select value={tradeForm.type} onChange={(e) => setTradeForm({...tradeForm, type: e.target.value})} style={{ width: '100%', padding: '12px', border: 'none', borderRadius: '6px', fontSize: '14px', cursor: 'pointer' }}>
+              <option value="BUY">🟢 BUY</option>
+              <option value="SELL">🔴 SELL</option>
+            </select>
+          </div>
+        </div>
+        <button onClick={executeTrade} style={{ marginTop: '15px', width: '100%', padding: '14px', background: tradeForm.type === 'BUY' ? '#10b981' : '#ef4444', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '16px' }}>
+          Execute {tradeForm.type} Order
+        </button>
+      </div>
+    )}
+
           );
         }
 
