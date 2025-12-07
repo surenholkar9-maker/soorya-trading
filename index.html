@@ -87,11 +87,16 @@
             ]
           };
 
-          const login = () => {
-            if (username === 'soorya' && password === 'Trading@2024') {
-              setAuthenticated(true);
-            }
-          };
+          const login = async () => {
+    try {
+      const response = await fetch('https://soorya-trading-backend.vercel.app/api/auth-url');
+      const data = await response.json();
+      window.location.href = data.authUrl;
+    } catch (error) {
+      console.error('Login failed:', error);
+      alert('Login failed. Please try again.');
+    }
+  };
 
           const searchInstruments = () => {
             return instruments[instrumentType].filter(item => 
