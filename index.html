@@ -157,8 +157,7 @@
             constructor() {
                 this.isConnected = false;
                 this.userData = null;
-                this.apiEndpoint = 'https://soorya-trading-backend-o9idh6eaq-sooryas-projects-4fd6f159.vercel.app/api' = 'https://soorya-trading-backend.vercel.app/api';
-                this.initializeApp();
+this.apiEndpoint = 'https://soorya-trading-backend.vercel.app/api';                this.initializeApp();
             }
 
             initializeApp() {
@@ -170,8 +169,7 @@
             async connectUpstox() {
                 try {
                     // Redirect to Upstox OAuth
-                    const authUrl = `${160
-                                       /upstox/= 'https://soorya-trading-backend-o9idh6eaq-sooryas-projects-4fd6f159.vercel.app/api'}/upstox/auth-url`;
+const authUrl = `${this.apiEndpoint}/upstox/auth-url`;
                     window.location.href = authUrl;
                 } catch (error) {
                     console.error('Connection failed:', error);
@@ -184,8 +182,7 @@
                     const token = localStorage.getItem('upstox_token');
                     if (!token) return;
                     
-                    const response = await fetch(`${this.apiEndpoint = 'https://soorya-trading-backend-o9idh6eaq-sooryas-projects-4fd6f159.vercel.app/api'}/upstox/portfolio`, {
-                        headers: { 'Authorization': `Bearer ${token}` }
+const response = await fetch(`${this.apiEndpoint}/upstox/portfolio`, {                        headers: { 'Authorization': `Bearer ${token}` }
                     });
                     const data = await response.json();
                     this.updatePortfolioUI(data);
