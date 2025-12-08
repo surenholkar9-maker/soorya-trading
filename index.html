@@ -169,8 +169,7 @@ this.apiEndpoint = 'https://soorya-trading-backend.vercel.app/api';             
             async connectUpstox() {
                 try {
                     // Redirect to Upstox OAuth
-const authUrl = `${this.apiEndpoint}/upstox/auth-url`;
-                    window.location.href = authUrl;
+const authUrl = `${this.apiEndpoint}/upstox/auth`;                    window.location.href = authUrl;
                 } catch (error) {
                     console.error('Connection failed:', error);
                     alert('Failed to connect to Upstox');
