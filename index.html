@@ -167,7 +167,7 @@ this.apiEndpoint = 'https://soorya-trading-backend.vercel.app/api';             
             }
 
             async connectUpstox() {
-                try try {
+                try {
       const response = await fetch(`${this.apiEndpoint}/auth-url`);
       const data = await response.json();
       if (data.authUrl) {
