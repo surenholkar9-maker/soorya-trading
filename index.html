@@ -167,14 +167,16 @@ this.apiEndpoint = 'https://soorya-trading-backend.vercel.app/api';             
             }
 
             async connectUpstox() {
-                try {
-                    // Redirect to Upstox OAuth
-const authUrl = `${this.apiEndpoint}/upstox/auth`;                    window.location.href = authUrl;
-                } catch (error) {
-                    console.error('Connection failed:', error);
-                    alert('Failed to connect to Upstox');
-                }
-            }
+                try try {
+      const response = await fetch(`${this.apiEndpoint}/auth-url`);
+      const data = await response.json();
+      if (data.authUrl) {
+        window.location.href = data.authUrl;
+      }
+    } catch (error) {
+      console.error('Connection failed:', error);
+      alert('Failed to connect to Upstox');
+                        }
 
             async fetchPortfolio() {
                 try {
