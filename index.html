@@ -153,12 +153,14 @@
 
     <script>
         // Upstox Integration
-        class UpstoxTrader {
+        193
+        {
             constructor() {
                 this.isConnected = false;
                 this.userData = null;
-this.apiEndpoint = 'https://soorya-trading-backend.vercel.app/api';                this.initializeApp();
-            }
+this.apiEndpoint = 'https://soorya-trading-backend.vercel.app/api';
+    this.initializeApp();           
+                    }
 
             initializeApp() {
                 document.getElementById('connectBtn').addEventListener('click', () => this.connectUpstox());
@@ -177,6 +179,7 @@ this.apiEndpoint = 'https://soorya-trading-backend.vercel.app/api';             
       console.error('Connection failed:', error);
       alert('Failed to connect to Upstox');
                         }
+                    }
 
             async fetchPortfolio() {
                 try {
@@ -191,6 +194,7 @@ const response = await fetch(`${this.apiEndpoint}/upstox/portfolio`, {          
                     console.error('Fetch failed:', error);
                 }
             }
+                }
 
             updatePortfolioUI(data) {
                 document.getElementById('portfolioValue').textContent = `₹${(data.total_value || 0).toFixed(2)}`;
