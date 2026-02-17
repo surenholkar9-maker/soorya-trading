@@ -172,8 +172,8 @@ this.apiEndpoint = 'https://soorya-trading-backend.vercel.app/api';
                 try {
       const response = await fetch(`${this.apiEndpoint}/upstox/auth`);
       const data = await response.json();
-      if (data.authUrl) {
-        window.location.href = data.authUrl;
+      if (data.auth_url) {
+        window.location.href = data.auth_url;
       }
     } catch (error) {
       console.error('Connection failed:', error);
