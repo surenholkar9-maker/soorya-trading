@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soorya Trading - Connecting...</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0a0e27, #16213e);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card {
+            background: rgba(20, 33, 61, 0.8);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 16px;
+            padding: 3rem 4rem;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            max-width: 480px;
+            width: 90%;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 2rem;
+        }
+        .spinner {
+            width: 56px;
+            height: 56px;
+            border: 4px solid rgba(102, 126, 234, 0.2);
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+            margin: 0 auto 1.5rem;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .status-text {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+        .status-sub {
+            font-size: 14px;
+            color: #888;
+        }
+        .success-icon {
+            font-size: 56px;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+        .error-icon {
+            font-size: 56px;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+        .retry-btn {
+            margin-top: 1.5rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-size: 15px;
+            cursor: pointer;
+            display: none;
+            transition: opacity 0.2s;
+        }
+        .retry-btn:hover {
+            opacity: 0.85;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="logo">☀️ Soorya Trading</div>
+        <div class="spinner" id="spinner"></div>
+        <div class="success-icon" id="successIcon">✓</div>
+        <div class="error-icon" id="errorIcon">✗</div>
+        <div class="status-text" id="statusText">Connecting to Upstox...</div>
+        <div class="status-sub" id="statusSub">Exchanging authorization code for access token</div>
+        <button class="retry-btn" id="retryBtn" onclick="window.location.href='./'">Back to Dashboard</button>
+    </div>
+    <script>
+        const API_ENDPOINT = 'https://soorya-trading-backend.vercel.app/api';
+
+        async function handleCallback() {
+            const params = new URLSearchParams(window.location.search);
+            const code = params.get('code');
+            const state = params.get('state');
+
+            // No code = something went wrong on Upstox side
+            if (!code) {
+                showError('No authorization code received.', 'Please try connecting again from the dashboard.');
+                return;
+            }
+
+            try {
+                // Exchange the auth code for an access token via your backend
+                const response = await fetch(`${API_ENDPOINT}/upstox/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`);
+
+                if (!response.ok) {
+                    const err = await response.json().catch(() => ({}));
+                    throw new Error(err.message || `Server error: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // Store the access token
+                if (data.access_token) {
+                    localStorage.setItem('upstox_token', data.access_token);
+                    showSuccess();
+                    // Redirect to dashboard after a short delay
+                    setTimeout(() => { window.location.href = './'; }, 1800);
+                } else {
+                    throw new Error('No access token returned from server.');
+                }
+            } catch (error) {
+                console.error('OAuth callback error:', error);
+                showError('Connection failed', error.message || 'Could not complete Upstox login. Please try again.');
+            }
+        }
+
+        function showSuccess() {
+            document.getElementById('spinner').style.display = 'none';
+            document.getElementById('successIcon').style.display = 'block';
+            document.getElementById('statusText').textContent = 'Connected to Upstox!';
+            document.getElementById('statusSub').textContent = 'Redirecting to your dashboard...';
+        }
+
+        function showError(title, detail) {
+            document.getElementById('spinner').style.display = 'none';
+            document.getElementById('errorIcon').style.display = 'block';
+            document.getElementById('statusText').textContent = title;
+            document.getElementById('statusSub').textContent = detail;
+            document.getElementById('retryBtn').style.display = 'inline-block';
+        }
+
+        // Run on page load
+        handleCallback();
+    </script>
+</body>
+</html>
