@@ -28,6 +28,7 @@ export default function handler(req, res) {
       message: 'OAuth URL generated successfully'
     });
   } else if (req.method === 'POST') {
+      return;
     // Exchange authorization code for access token
     const { code } = req.body;
     
