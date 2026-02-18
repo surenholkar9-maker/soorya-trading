@@ -56,11 +56,13 @@
         }
         .success-icon {
             font-size: 56px;
+            color: #10b981;
             margin-bottom: 1.5rem;
             display: none;
         }
         .error-icon {
             font-size: 56px;
+            color: #ef4444;
             margin-bottom: 1.5rem;
             display: none;
         }
@@ -91,43 +93,42 @@
         <div class="status-sub" id="statusSub">Exchanging authorization code for access token</div>
         <button class="retry-btn" id="retryBtn" onclick="window.location.href='./'">Back to Dashboard</button>
     </div>
+
     <script>
         const API_ENDPOINT = 'https://soorya-trading-backend.vercel.app/api';
-
+        
         async function handleCallback() {
             const params = new URLSearchParams(window.location.search);
             const code = params.get('code');
             const state = params.get('state');
 
-            // No code = something went wrong on Upstox side
             if (!code) {
                 showError('No authorization code received.', 'Please try connecting again from the dashboard.');
                 return;
             }
 
             try {
-                // Exchange the auth code for an access token via your backend
-                const response = await fetch(`${API_ENDPOINT}/upstox/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`);
-
+                // Exchange code for token via backend
+                const response = await fetch(`${API_ENDPOINT}/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`);
+                
                 if (!response.ok) {
                     const err = await response.json().catch(() => ({}));
                     throw new Error(err.message || `Server error: ${response.status}`);
                 }
 
                 const data = await response.json();
-
-                // Store the access token
+                
                 if (data.access_token) {
                     localStorage.setItem('upstox_token', data.access_token);
                     showSuccess();
-                    // Redirect to dashboard after a short delay
-                    setTimeout(() => { window.location.href = './'; }, 1800);
+                    // Redirect to dashboard
+                    setTimeout(() => { window.location.href = './'; }, 1500);
                 } else {
                     throw new Error('No access token returned from server.');
                 }
             } catch (error) {
                 console.error('OAuth callback error:', error);
-                showError('Connection failed', error.message || 'Could not complete Upstox login. Please try again.');
+                showError('Connection failed', error.message || 'Could not complete Upstox login.');
             }
         }
 
@@ -146,7 +147,6 @@
             document.getElementById('retryBtn').style.display = 'inline-block';
         }
 
-        // Run on page load
         handleCallback();
     </script>
 </body>
