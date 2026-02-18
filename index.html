@@ -162,10 +162,9 @@
                 document.getElementById('connectBtn').addEventListener('click', () => this.connectUpstox());
                 document.getElementById('logoutBtn').addEventListener('click', () => this.logout());
                 
-                // Handle OAuth callback
+                // Check for token in URL (from backend redirect if used)
                 const urlParams = new URLSearchParams(window.location.search);
                 const tokenFromUrl = urlParams.get('token');
-                
                 if (tokenFromUrl) {
                     localStorage.setItem('upstox_token', tokenFromUrl);
                     this.token = tokenFromUrl;
@@ -182,8 +181,9 @@
                 try {
                     const response = await fetch(`${this.apiEndpoint}/auth-url`);
                     const data = await response.json();
-                    if (data.url) {
-                        window.location.href = data.url;
+                    const authUrl = data.authUrl || data.url; // Support both naming conventions
+                    if (authUrl) {
+                        window.location.href = authUrl;
                     }
                 } catch (error) {
                     console.error('Connection failed:', error);
@@ -194,12 +194,14 @@
             async fetchPortfolio() {
                 try {
                     const response = await fetch(`${this.apiEndpoint}/portfolio?token=${this.token}`);
-                    if (!response.ok) throw new Error('Failed to fetch portfolio');
+                    if (!response.ok) {
+                        if (response.status === 401) this.logout();
+                        throw new Error('Failed to fetch portfolio');
+                    }
                     const data = await response.json();
                     this.updatePortfolioUI(data);
                 } catch (error) {
                     console.error('Fetch failed:', error);
-                    if (error.message.includes('401')) this.logout();
                 }
             }
 
