@@ -108,12 +108,11 @@
             }
 
             try {
-                // Exchange code for token via backend
-                const response = await fetch(`${API_ENDPOINT}/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`);
+                const response = await fetch(API_ENDPOINT + '/callback?code=' + encodeURIComponent(code) + '&state=' + encodeURIComponent(state));
                 
                 if (!response.ok) {
-                    const err = await response.json().catch(() => ({}));
-                    throw new Error(err.message || `Server error: ${response.status}`);
+                    const err = await response.json().catch(function() { return {}; });
+                    throw new Error(err.message || 'Server error: ' + response.status);
                 }
 
                 const data = await response.json();
@@ -121,8 +120,7 @@
                 if (data.access_token) {
                     localStorage.setItem('upstox_token', data.access_token);
                     showSuccess();
-                    // Redirect to dashboard
-                    setTimeout(() => { window.location.href = './'; }, 1500);
+                    setTimeout(function() { window.location.href = './'; }, 1500);
                 } else {
                     throw new Error('No access token returned from server.');
                 }
