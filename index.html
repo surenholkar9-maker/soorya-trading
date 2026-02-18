@@ -162,7 +162,6 @@
                 document.getElementById('connectBtn').addEventListener('click', () => this.connectUpstox());
                 document.getElementById('logoutBtn').addEventListener('click', () => this.logout());
                 
-                // Check for token in URL (from backend redirect if used)
                 const urlParams = new URLSearchParams(window.location.search);
                 const tokenFromUrl = urlParams.get('token');
                 if (tokenFromUrl) {
@@ -179,21 +178,21 @@
 
             async connectUpstox() {
                 try {
-                    const response = await fetch(`${this.apiEndpoint}/auth-url`);
+                    const response = await fetch(this.apiEndpoint + '/auth-url');
                     const data = await response.json();
-                    const authUrl = data.authUrl || data.url; // Support both naming conventions
+                    const authUrl = data.authUrl || data.url;
                     if (authUrl) {
                         window.location.href = authUrl;
                     }
                 } catch (error) {
                     console.error('Connection failed:', error);
-                    alert('Failed to get auth URL from backend');
+                    alert('Failed to get auth URL');
                 }
             }
 
             async fetchPortfolio() {
                 try {
-                    const response = await fetch(`${this.apiEndpoint}/portfolio?token=${this.token}`);
+                    const response = await fetch(this.apiEndpoint + '/portfolio?token=' + this.token);
                     if (!response.ok) {
                         if (response.status === 401) this.logout();
                         throw new Error('Failed to fetch portfolio');
@@ -224,23 +223,23 @@
             }
 
             updatePortfolioUI(data) {
-                document.getElementById('portfolioValue').textContent = \`₹\${(data.portfolio_value || 0).toLocaleString('en-IN')}\`;
-                document.getElementById('marginAvailable').textContent = \`₹\${(data.margin || 0).toLocaleString('en-IN')}\`;
+                document.getElementById('portfolioValue').textContent = '₹' + (data.portfolio_value || 0).toLocaleString('en-IN');
+                document.getElementById('marginAvailable').textContent = '₹' + (data.margin || 0).toLocaleString('en-IN');
                 
                 const tbody = document.getElementById('holdingsBody');
                 if (data.holdings && data.holdings.length > 0) {
-                    tbody.innerHTML = data.holdings.map(h => \`
-                        <tr>
-                            <td><strong>\${h.trading_symbol}</strong></td>
-                            <td>\${h.quantity}</td>
-                            <td>₹\${h.average_price.toFixed(2)}</td>
-                            <td>₹\${h.last_price.toFixed(2)}</td>
-                            <td style="color: \${h.pnl >= 0 ? '#10b981' : '#ef4444'};">
-                                \${h.pnl >= 0 ? '+' : ''}\${h.pnl.toFixed(2)}
-                            </td>
-                            <td><button class="nav-btn" style="padding: 0.3rem 0.8rem; font-size: 12px;">Trade</button></td>
-                        </tr>
-                    \`).join('');
+                    tbody.innerHTML = data.holdings.map(h => 
+                        '<tr>' +
+                            '<td><strong>' + h.trading_symbol + '</strong></td>' +
+                            '<td>' + h.quantity + '</td>' +
+                            '<td>₹' + h.average_price.toFixed(2) + '</td>' +
+                            '<td>₹' + h.last_price.toFixed(2) + '</td>' +
+                            '<td style="color: ' + (h.pnl >= 0 ? '#10b981' : '#ef4444') + ';">' +
+                                (h.pnl >= 0 ? '+' : '') + h.pnl.toFixed(2) +
+                            '</td>' +
+                            '<td><button class="nav-btn" style="padding: 0.3rem 0.8rem; font-size: 12px;">Trade</button></td>' +
+                        '</tr>'
+                    ).join('');
                 } else {
                     tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No holdings found</td></tr>';
                 }
