@@ -64,7 +64,6 @@
             transition: all 0.3s;
         }
         .upstox-btn:hover { transform: scale(1.05); box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4); }
-        .chart-container { position: relative; height: 300px; margin-top: 2rem; }
         .status { padding: 0.5rem 1rem; border-radius: 6px; font-size: 12px; font-weight: 600; display: inline-block; }
         .status.connected { background: rgba(16, 185, 129, 0.2); color: #10b981; }
         .status.disconnected { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
@@ -79,7 +78,7 @@
         <div class="nav-items">
             <div id="upstoxStatus" class="status disconnected">Disconnected</div>
             <button class="nav-btn" id="connectBtn">Connect Upstox</button>
-            <button class="nav-btn" id="logoutBtn">Logout</button>
+            <button class="nav-btn" id="logoutBtn" style="display: none;">Logout</button>
         </div>
     </div>
 
@@ -122,7 +121,7 @@
                 </thead>
                 <tbody id="holdingsBody">
                     <tr>
-                        <td colspan="6" style="text-align: center; padding: 2rem;">Loading holdings from Upstox...</td>
+                        <td colspan="6" style="text-align: center; padding: 2rem;">Click "Connect Upstox" to see your portfolio</td>
                     </tr>
                 </tbody>
             </table>
@@ -152,92 +151,106 @@
     </div>
 
     <script>
-        // Upstox Integration
         class UpstoxTrader {
             constructor() {
-                this.isConnected = false;
-                this.userData = null;
                 this.apiEndpoint = 'https://soorya-trading-backend.vercel.app/api';
+                this.token = localStorage.getItem('upstox_token');
                 this.initializeApp();
             }
 
             initializeApp() {
                 document.getElementById('connectBtn').addEventListener('click', () => this.connectUpstox());
                 document.getElementById('logoutBtn').addEventListener('click', () => this.logout());
-                this.loadDemoData();
+                
+                // Handle OAuth callback
+                const urlParams = new URLSearchParams(window.location.search);
+                const tokenFromUrl = urlParams.get('token');
+                
+                if (tokenFromUrl) {
+                    localStorage.setItem('upstox_token', tokenFromUrl);
+                    this.token = tokenFromUrl;
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+
+                if (this.token) {
+                    this.updateStatus(true);
+                    this.fetchPortfolio();
+                }
             }
 
             async connectUpstox() {
                 try {
-                    const response = await fetch(`${this.apiEndpoint}/upstox/auth`);
+                    const response = await fetch(`${this.apiEndpoint}/auth-url`);
                     const data = await response.json();
-                    if (data.auth_url) {
-                        window.location.href = data.auth_url;
+                    if (data.url) {
+                        window.location.href = data.url;
                     }
                 } catch (error) {
                     console.error('Connection failed:', error);
-                    alert('Failed to connect to Upstox');
+                    alert('Failed to get auth URL from backend');
                 }
             }
 
             async fetchPortfolio() {
                 try {
-                    const token = localStorage.getItem('upstox_token');
-                    if (!token) return;
-
-                    const response = await fetch(`${this.apiEndpoint}/upstox/portfolio`, {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
+                    const response = await fetch(`${this.apiEndpoint}/portfolio?token=${this.token}`);
+                    if (!response.ok) throw new Error('Failed to fetch portfolio');
                     const data = await response.json();
                     this.updatePortfolioUI(data);
                 } catch (error) {
                     console.error('Fetch failed:', error);
+                    if (error.message.includes('401')) this.logout();
+                }
+            }
+
+            updateStatus(connected) {
+                const status = document.getElementById('upstoxStatus');
+                const connectBtn = document.getElementById('connectBtn');
+                const logoutBtn = document.getElementById('logoutBtn');
+                
+                if (connected) {
+                    status.textContent = 'Connected';
+                    status.className = 'status connected';
+                    connectBtn.style.display = 'none';
+                    logoutBtn.style.display = 'block';
+                } else {
+                    status.textContent = 'Disconnected';
+                    status.className = 'status disconnected';
+                    connectBtn.style.display = 'block';
+                    logoutBtn.style.display = 'none';
                 }
             }
 
             updatePortfolioUI(data) {
-                document.getElementById('portfolioValue').textContent = `₹${(data.total_value || 0).toFixed(2)}`;
-                document.getElementById('dayChange').textContent = `${(data.day_change || 0).toFixed(2)}%`;
-                document.getElementById('marginAvailable').textContent = `₹${(data.margin || 0).toFixed(2)}`;
-
+                document.getElementById('portfolioValue').textContent = \`₹\${(data.portfolio_value || 0).toLocaleString('en-IN')}\`;
+                document.getElementById('marginAvailable').textContent = \`₹\${(data.margin || 0).toLocaleString('en-IN')}\`;
+                
                 const tbody = document.getElementById('holdingsBody');
-                tbody.innerHTML = data.holdings?.map(h => `
-                    <tr>
-                        <td><strong>${h.symbol}</strong></td>
-                        <td>${h.quantity}</td>
-                        <td>₹${h.buy_price.toFixed(2)}</td>
-                        <td>₹${h.current_price.toFixed(2)}</td>
-                        <td style="color: ${h.pnl >= 0 ? '#10b981' : '#ef4444'};">${h.pnl >= 0 ? '+' : ''}${h.pnl.toFixed(2)}%</td>
-                        <td><button class="nav-btn" style="padding: 0.3rem 0.8rem; font-size: 12px;">Sell</button></td>
-                    </tr>
-                `).join('') || '<tr><td colspan="6" style="text-align: center;">No holdings</td></tr>';
-            }
-
-            loadDemoData() {
-                const demoData = {
-                    total_value: 500000,
-                    day_change: 2.35,
-                    margin: 150000,
-                    holdings: [
-                        { symbol: 'RELIANCE', quantity: 10, buy_price: 2500, current_price: 2850, pnl: 14 },
-                        { symbol: 'TCS', quantity: 5, buy_price: 3500, current_price: 3680, pnl: 5.14 },
-                        { symbol: 'INFY', quantity: 15, buy_price: 1400, current_price: 1420, pnl: 1.43 }
-                    ]
-                };
-                this.updatePortfolioUI(demoData);
-                document.getElementById('openOrders').textContent = '2';
+                if (data.holdings && data.holdings.length > 0) {
+                    tbody.innerHTML = data.holdings.map(h => \`
+                        <tr>
+                            <td><strong>\${h.trading_symbol}</strong></td>
+                            <td>\${h.quantity}</td>
+                            <td>₹\${h.average_price.toFixed(2)}</td>
+                            <td>₹\${h.last_price.toFixed(2)}</td>
+                            <td style="color: \${h.pnl >= 0 ? '#10b981' : '#ef4444'};">
+                                \${h.pnl >= 0 ? '+' : ''}\${h.pnl.toFixed(2)}
+                            </td>
+                            <td><button class="nav-btn" style="padding: 0.3rem 0.8rem; font-size: 12px;">Trade</button></td>
+                        </tr>
+                    \`).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No holdings found</td></tr>';
+                }
             }
 
             logout() {
                 localStorage.removeItem('upstox_token');
-                this.isConnected = false;
-                document.getElementById('upstoxStatus').textContent = 'Disconnected';
-                document.getElementById('upstoxStatus').className = 'status disconnected';
+                this.updateStatus(false);
                 location.reload();
             }
         }
 
-        // Initialize app
         window.addEventListener('DOMContentLoaded', () => {
             new UpstoxTrader();
         });
